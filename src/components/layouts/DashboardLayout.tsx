@@ -6,7 +6,7 @@ export function DashboardLayout() {
     <div className="min-h-screen flex flex-col">
       <HorizontalNav />
       <main className="flex-1 flex flex-col">
-        <div className="flex-1 mx-auto w-full max-w-[1400px] px-6 py-8">
+        <div className="flex-1 mx-auto w-full max-w-[1600px] px-6 py-8">
           <Outlet />
         </div>
       </main>

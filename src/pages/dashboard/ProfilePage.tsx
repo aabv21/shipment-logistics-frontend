@@ -43,7 +43,6 @@ export function ProfilePage() {
   const onSubmit = async (data: ProfileFormValues) => {
     try {
       console.log("Datos del perfil a actualizar:", data);
-      // Aquí irá la lógica para actualizar el perfil
     } catch (error) {
       console.error("Error al actualizar el perfil:", error);
     }

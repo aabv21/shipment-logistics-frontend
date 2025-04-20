@@ -9,15 +9,30 @@ export interface Address {
 
 export interface Shipment {
   id: string;
-  status: "pending" | "in_transit" | "delivered" | "cancelled";
-  pickupAddress: Address;
-  deliveryAddress: Address;
-  weight: number;
-  dimensions: {
-    length: number;
-    width: number;
-    height: number;
-  };
-  description?: string;
-  createdAt: string;
+  tracking_number: string;
+  user_id: string;
+  product_type: string;
+  recipient_name: string;
+  recipient_phone: string;
+  origin_formatted_address: string;
+  origin_place_id?: string;
+  origin_latitude: number;
+  origin_longitude: number;
+  destination_formatted_address: string;
+  destination_place_id?: string;
+  destination_latitude: number;
+  destination_longitude: number;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
+  additional_details?: string;
+  start_date_time: string;
+  delivery_date_time: string;
+  window_delivery_time?: string;
+  status: "PENDING" | "IN_TRANSIT" | "DELIVERED" | "CANCELLED";
+  created_at: string;
+  updated_at: string;
+  carrier_id?: string;
+  route_id?: string;
 }

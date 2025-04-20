@@ -14,6 +14,7 @@ import { RegisterPage } from "@/pages/auth/RegisterPage";
 // Protected Pages
 import { DashboardPage } from "@/pages/dashboard/DashboardPage";
 import { ProfilePage } from "@/pages/dashboard/ProfilePage";
+import { ShipmentsPage } from "@/pages/shipments/ShipmentsPage";
 import { CreateShipmentPage } from "@/pages/shipments/CreateShipmentPage";
 
 const router = createBrowserRouter([
@@ -50,11 +51,15 @@ const router = createBrowserRouter([
       },
       {
         path: "shipments",
-        element: <CreateShipmentPage />,
+        element: <ShipmentsPage />,
       },
       {
         path: "profile",
         element: <ProfilePage />,
+      },
+      {
+        path: "shipments/create",
+        element: <CreateShipmentPage />,
       },
     ],
   },
