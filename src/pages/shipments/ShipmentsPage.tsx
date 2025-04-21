@@ -127,7 +127,7 @@ export function ShipmentsPage() {
       </div>
 
       <div className="rounded-md border overflow-x-auto">
-        <Table>
+        <Table key={"shipments-table"}>
           <TableHeader>
             <TableRow>
               <TableHead>

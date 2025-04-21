@@ -118,7 +118,7 @@ export function CarriersPage() {
       </div>
 
       <div className="rounded-md border overflow-x-auto">
-        <Table>
+        <Table key={"carriers-table"}>
           <TableHeader>
             <TableRow>
               <TableHead>

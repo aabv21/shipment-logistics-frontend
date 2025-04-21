@@ -57,9 +57,19 @@ export function AddHistoryStatus({ shipmentId, onStatusAdded }: Props) {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+        onKeyDown={handleKeyDown}
+      >
         <FormField
           control={form.control}
           name="status"
@@ -92,9 +102,6 @@ export function AddHistoryStatus({ shipmentId, onStatusAdded }: Props) {
               <FormLabel>Ubicación</FormLabel>
               <FormControl>
                 <AddressAutocomplete
-                  instanceId="history-location"
-                  value={field.value}
-                  onChange={field.onChange}
                   onAddressSelect={(place) => {
                     if (place) {
                       form.setValue(
@@ -105,10 +112,12 @@ export function AddHistoryStatus({ shipmentId, onStatusAdded }: Props) {
                       form.setValue("location_latitude", place.lat.toString());
                       form.setValue("location_longitude", place.lng.toString());
                     } else {
+                      field.onChange("");
                       form.setValue("location_formatted_address", "");
                       form.setValue("location_place_id", "");
                       form.setValue("location_latitude", "");
                       form.setValue("location_longitude", "");
+                      form.trigger("location_formatted_address");
                     }
                   }}
                 />

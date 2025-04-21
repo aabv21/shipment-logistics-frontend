@@ -37,7 +37,6 @@ export function AddressAutocomplete({
   useEffect(() => {
     if (!isLoaded || !inputRef.current) return;
 
-    // Si ya existe una instancia para este ID, la limpiamos
     if (autocompleteInstances.has(instanceId)) {
       const instance = autocompleteInstances.get(instanceId);
       if (instance) {
@@ -70,8 +69,6 @@ export function AddressAutocomplete({
         });
         setInputValue(place.formatted_address);
       });
-
-      autocompleteInstances.set(instanceId, autocomplete);
     } catch (err) {
       console.error("Error initializing Google Maps Autocomplete:", err);
       setError("Error al inicializar el autocompletado de direcciones");
