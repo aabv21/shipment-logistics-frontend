@@ -69,10 +69,11 @@ src/
 - `/login` - Inicio de sesión
 - `/register` - Registro de usuarios
 - `/shipments` - Lista de envíos
-- `/shipments/new` - Crear nuevo envío
-- `/shipments/:id` - Detalles y tracking
+- `/shipments/create` - Crear nuevo envío
+- `/shipments/tracking/:id` - Seguimiento de envío por ID
+- `/routes` - Gestión de rutas
+- `/carriers` - Gestión de transportistas
 - `/profile` - Perfil de usuario
-- `/settings` - Configuración
 
 ## 🔌 APIs Utilizadas
 
