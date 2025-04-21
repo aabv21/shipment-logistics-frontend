@@ -1,8 +1,8 @@
 // Dependencies
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
   Form,
   FormField,
@@ -25,51 +25,20 @@ import {
 import { AddressAutocomplete } from "@/components/address/AddressAutocomplete";
 
 // Services
-import { shipmentsService } from "@/services/shipments.service";
+import { shipmentsService } from "@/services/shipments";
 import { PRODUCT_TYPES } from "@/constants";
 
 // Utils
 import { getLocalISOString } from "@/lib/utils";
-declare global {
-  interface Window {
-    google: {
-      maps: {
-        Geocoder: new () => google.maps.Geocoder;
-        GeocoderStatus: {
-          OK: "OK";
-        };
-      };
-    };
-  }
-}
-
-const createShipmentSchema = z.object({
-  weight: z.string(),
-  length: z.string(),
-  width: z.string(),
-  height: z.string(),
-  product_type: z.string(),
-  recipient_name: z.string(),
-  recipient_phone: z.string(),
-  formatted_address: z.string(),
-  place_id: z.string(),
-  window_delivery_time: z
-    .string()
-    .refine((val) => !val || !isNaN(Date.parse(val)), {
-      message: "Debe ser una fecha y hora válida",
-    }),
-  delivery_date_time: z.string(),
-  start_date_time: z.string(),
-  status: z.string(),
-  additional_details: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-});
-
-type FormData = z.infer<typeof createShipmentSchema>;
+import {
+  createShipmentSchema,
+  type CreateShipmentFormData,
+} from "../../schemas/create-shipment-schema";
 
 export function CreateShipmentForm() {
-  const form = useForm<FormData>({
+  const navigate = useNavigate();
+  const form = useForm<CreateShipmentFormData>({
+    resolver: zodResolver(createShipmentSchema),
     defaultValues: {
       weight: "",
       length: "",
@@ -78,49 +47,91 @@ export function CreateShipmentForm() {
       product_type: "",
       recipient_name: "",
       recipient_phone: "",
-      formatted_address: "",
-      place_id: "",
-      window_delivery_time: "",
+      origin_formatted_address: "",
+      origin_place_id: "",
+      destination_formatted_address: "",
+      destination_place_id: "",
+      start_date_time: getLocalISOString(new Date(Date.now() + 60 * 60 * 1000)),
       delivery_date_time: "",
-      start_date_time: getLocalISOString(new Date()),
-      status: "PENDING",
+      window_delivery_time: "",
       additional_details: "",
     },
-    resolver: zodResolver(createShipmentSchema),
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CreateShipmentFormData) => {
     try {
       const geocoder = new window.google.maps.Geocoder();
-      const result = await new Promise<google.maps.GeocoderResult>(
-        (resolve, reject) => {
-          geocoder.geocode({ placeId: data.place_id }, (results, status) => {
-            if (status === google.maps.GeocoderStatus.OK && results?.[0]) {
+
+      // Geocode origin address
+      const originResult = await new Promise((resolve, reject) => {
+        geocoder.geocode(
+          { placeId: data.origin_place_id },
+          (results, status) => {
+            if (status === "OK" && results?.[0]?.geometry?.location) {
               resolve(results[0]);
             } else {
-              reject(new Error("Failed to geocode address"));
+              reject(new Error("Failed to geocode origin address"));
             }
-          });
-        }
-      );
+          }
+        );
+      });
 
+      // Geocode destination address
+      const destResult = await new Promise((resolve, reject) => {
+        geocoder.geocode(
+          { placeId: data.destination_place_id },
+          (results, status) => {
+            if (status === "OK" && results?.[0]?.geometry?.location) {
+              resolve(results[0]);
+            } else {
+              reject(new Error("Failed to geocode destination address"));
+            }
+          }
+        );
+      });
+
+      const originLocation = (originResult as google.maps.GeocoderResult)
+        .geometry.location;
+      const destLocation = (destResult as google.maps.GeocoderResult).geometry
+        .location;
+
+      // Transform form data to match API expectations
       const shipmentData = {
-        ...data,
-        latitude: result.geometry.location.lat(),
-        longitude: result.geometry.location.lng(),
+        product_type: data.product_type,
+        recipient_name: data.recipient_name,
+        recipient_phone: data.recipient_phone,
+        origin_formatted_address: data.origin_formatted_address,
+        origin_place_id: data.origin_place_id,
+        destination_formatted_address: data.destination_formatted_address,
+        destination_place_id: data.destination_place_id,
+        weight: data.weight,
+        length: data.length,
+        width: data.width,
+        height: data.height,
+        additional_details: data.additional_details,
+        start_date_time: data.start_date_time,
+        delivery_date_time: data.delivery_date_time,
+        origin_latitude: originLocation.lat(),
+        origin_longitude: originLocation.lng(),
+        destination_latitude: destLocation.lat(),
+        destination_longitude: destLocation.lng(),
       };
 
+      // Call the API to create the shipment
       await shipmentsService.create(shipmentData);
+
       toast.success("Shipment created successfully");
+      form.reset();
+      navigate("/shipments");
     } catch (error) {
       console.error("Error creating shipment:", error);
-      toast.error("Failed to create shipment");
+      toast.error("Failed to create shipment. Please try again.");
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Package Information */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Información del paquete</h3>
@@ -244,13 +255,57 @@ export function CreateShipmentForm() {
             />
 
             <div className="md:col-span-2 lg:col-span-3">
-              <AddressAutocomplete
-                onAddressSelect={(place) => {
-                  if (place) {
-                    form.setValue("formatted_address", place.formattedAddress);
-                    form.setValue("place_id", place.place_id);
-                  }
-                }}
+              <FormField
+                control={form.control}
+                name="origin_formatted_address"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Dirección de origen</FormLabel>
+                    <FormControl>
+                      <AddressAutocomplete
+                        instanceId="origin"
+                        onAddressSelect={(place) => {
+                          if (place) {
+                            form.setValue(
+                              "origin_formatted_address",
+                              place.formattedAddress
+                            );
+                            form.setValue("origin_place_id", place.place_id);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="md:col-span-2 lg:col-span-3">
+              <FormField
+                control={form.control}
+                name="destination_formatted_address"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Dirección de destino</FormLabel>
+                    <FormControl>
+                      <AddressAutocomplete
+                        instanceId="destination"
+                        onAddressSelect={(place) => {
+                          if (place) {
+                            form.setValue(
+                              "destination_formatted_address",
+                              place.formattedAddress
+                            );
+                            form.setValue(
+                              "destination_place_id",
+                              place.place_id
+                            );
+                          }
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
             </div>
 
@@ -287,7 +342,7 @@ export function CreateShipmentForm() {
               name="window_delivery_time"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Fecha y hora máxima de entrega</FormLabel>
+                  <FormLabel>Tiempo de entrega</FormLabel>
                   <FormControl>
                     <Input type="datetime-local" {...field} />
                   </FormControl>

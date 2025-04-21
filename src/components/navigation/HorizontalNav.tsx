@@ -12,6 +12,8 @@ import {
   UserCircle,
   LogOut,
   Menu,
+  Truck,
+  Map,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { Button } from "@/components/ui/button";
@@ -41,6 +43,18 @@ export function HorizontalNav() {
       icon: Package,
       href: "/shipments",
       active: pathname === "/shipments",
+    },
+    {
+      label: "Transportistas",
+      icon: Truck,
+      href: "/carriers",
+      active: pathname === "/carriers",
+    },
+    {
+      label: "Rutas",
+      icon: Map,
+      href: "/routes",
+      active: pathname === "/routes",
     },
     {
       label: "Perfil",
