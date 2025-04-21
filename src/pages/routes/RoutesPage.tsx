@@ -126,7 +126,7 @@ export function RoutesPage() {
       </div>
 
       <div className="rounded-md border overflow-x-auto">
-        <Table>
+        <Table key={"routes-table"}>
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>

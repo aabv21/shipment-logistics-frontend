@@ -122,7 +122,9 @@ export function CreateShipmentForm() {
 
       toast.success("Shipment created successfully");
       form.reset();
-      navigate("/shipments");
+      setTimeout(() => {
+        navigate("/shipments", { replace: true });
+      }, 500);
     } catch (error) {
       console.error("Error creating shipment:", error);
       toast.error("Failed to create shipment. Please try again.");
@@ -263,7 +265,6 @@ export function CreateShipmentForm() {
                     <FormLabel>Dirección de origen</FormLabel>
                     <FormControl>
                       <AddressAutocomplete
-                        instanceId="origin"
                         onAddressSelect={(place) => {
                           if (place) {
                             form.setValue(
@@ -289,7 +290,6 @@ export function CreateShipmentForm() {
                     <FormLabel>Dirección de destino</FormLabel>
                     <FormControl>
                       <AddressAutocomplete
-                        instanceId="destination"
                         onAddressSelect={(place) => {
                           if (place) {
                             form.setValue(
