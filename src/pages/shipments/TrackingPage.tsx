@@ -7,10 +7,11 @@ import {
   CalendarIcon,
   ClipboardIcon,
   PlusCircle,
+  PackageIcon,
 } from "lucide-react";
 import { shipmentsService } from "@/services/shipments";
 import { Shipment } from "@/types/shipment";
-import { formatDate } from "@/lib/utils";
+import { formatDate, getShipmentStatusInfo } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -29,6 +30,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 import {
   Table,
@@ -176,9 +178,18 @@ export const TrackingPage = () => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-semibold">
-          Tracking {shipment?.tracking_number}
-        </h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-semibold flex items-center gap-2">
+            <PackageIcon className="h-8 w-8" />
+            Tracking {shipment?.tracking_number}
+          </h1>
+          <Badge
+            className="text-base"
+            variant={getShipmentStatusInfo(shipment?.status || "").variant}
+          >
+            {getShipmentStatusInfo(shipment?.status || "").label}
+          </Badge>
+        </div>
         {user?.role !== "ADMIN" && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -226,6 +237,7 @@ export const TrackingPage = () => {
                       Fecha
                     </div>
                   </TableHead>
+                  <TableHead>Estado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -268,6 +280,13 @@ export const TrackingPage = () => {
                       </TooltipProvider>
                     </TableCell>
                     <TableCell>{formatDate(event.created_at)}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={getShipmentStatusInfo(event.status).variant}
+                      >
+                        {getShipmentStatusInfo(event.status).label}
+                      </Badge>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

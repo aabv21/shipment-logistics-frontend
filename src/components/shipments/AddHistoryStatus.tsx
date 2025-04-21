@@ -1,6 +1,15 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -8,9 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ShipmentStatus } from "@/types/shipment";
 import { shipmentsService } from "@/services/shipments";
 import { AddressAutocomplete } from "@/components/address/AddressAutocomplete";
+import {
+  addHistoryStatusSchema,
+  type AddHistoryStatusFormData,
+} from "../../schemas/add-history-status-schema";
 
 interface Props {
   shipmentId: string;
@@ -18,90 +30,115 @@ interface Props {
 }
 
 export function AddHistoryStatus({ shipmentId, onStatusAdded }: Props) {
-  const [status, setStatus] = useState<ShipmentStatus>("PENDING");
-  const [notes, setNotes] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-    place_id: string;
-    formatted_address: string;
-  } | null>(null);
+  const form = useForm<AddHistoryStatusFormData>({
+    resolver: zodResolver(addHistoryStatusSchema),
+    defaultValues: {
+      status: "PENDING",
+      notes: "",
+      location_formatted_address: "",
+      location_place_id: "",
+      location_latitude: "",
+      location_longitude: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!location) return;
-
+  const onSubmit = async (data: AddHistoryStatusFormData) => {
     try {
-      setLoading(true);
-      console.log(shipmentId);
       await shipmentsService.addHistory(shipmentId, {
         shipment_id: shipmentId,
-        status,
-        notes,
-        location_latitude: location.latitude.toString(),
-        location_longitude: location.longitude.toString(),
-        location_place_id: location.place_id,
-        location_formatted_address: location.formatted_address,
+        ...data,
+        notes: data.notes || "",
       });
 
-      setStatus("PENDING");
-      setNotes("");
-      setLocation(null);
+      form.reset();
       onStatusAdded();
     } catch (error) {
       console.error("Error adding history:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Estado</label>
-        <Select
-          value={status}
-          onValueChange={(value: ShipmentStatus) => setStatus(value)}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="PENDING">Pendiente</SelectItem>
-            <SelectItem value="IN_TRANSIT">En Tránsito</SelectItem>
-            <SelectItem value="DELIVERED">Entregado</SelectItem>
-            <SelectItem value="CANCELLED">Cancelado</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Ubicación</label>
-        <AddressAutocomplete
-          onAddressSelect={(address) => {
-            setLocation({
-              latitude: address.lat,
-              longitude: address.lng,
-              place_id: address.place_id,
-              formatted_address: address.formattedAddress,
-            });
-          }}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estado</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="PENDING">Pendiente</SelectItem>
+                  <SelectItem value="IN_TRANSIT">En Tránsito</SelectItem>
+                  <SelectItem value="DELIVERED">Entregado</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelado</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Notas</label>
-        <Textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Agregar notas sobre el estado..."
+        <FormField
+          control={form.control}
+          name="location_formatted_address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ubicación</FormLabel>
+              <FormControl>
+                <AddressAutocomplete
+                  instanceId="history-location"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onAddressSelect={(place) => {
+                    if (place) {
+                      form.setValue(
+                        "location_formatted_address",
+                        place.formattedAddress
+                      );
+                      form.setValue("location_place_id", place.place_id);
+                      form.setValue("location_latitude", place.lat.toString());
+                      form.setValue("location_longitude", place.lng.toString());
+                    } else {
+                      form.setValue("location_formatted_address", "");
+                      form.setValue("location_place_id", "");
+                      form.setValue("location_latitude", "");
+                      form.setValue("location_longitude", "");
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <Button type="submit" disabled={loading || !location}>
-        {loading ? "Agregando..." : "Agregar Estado"}
-      </Button>
-    </form>
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notas</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Agregar notas sobre el estado..."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Agregando..." : "Agregar Estado"}
+        </Button>
+      </form>
+    </Form>
   );
 }

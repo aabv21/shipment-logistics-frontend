@@ -17,6 +17,8 @@ import { ProfilePage } from "@/pages/dashboard/ProfilePage";
 import { ShipmentsPage } from "@/pages/shipments/ShipmentsPage";
 import { CreateShipmentPage } from "@/pages/shipments/CreateShipmentPage";
 import { TrackingPage } from "@/pages/shipments/TrackingPage";
+import { CarriersPage } from "@/pages/carriers/CarriersPage";
+import { RoutesPage } from "@/pages/routes/RoutesPage";
 
 const router = createBrowserRouter([
   // Public routes
@@ -65,6 +67,14 @@ const router = createBrowserRouter([
       {
         path: "shipments/create",
         element: <CreateShipmentPage />,
+      },
+      {
+        path: "carriers",
+        element: <CarriersPage />,
+      },
+      {
+        path: "routes",
+        element: <RoutesPage />,
       },
     ],
   },

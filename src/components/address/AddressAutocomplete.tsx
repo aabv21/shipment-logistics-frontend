@@ -12,20 +12,39 @@ interface AddressAutocompleteProps {
     place_id: string;
   }) => void;
   defaultValue?: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  instanceId?: string;
 }
+
+const autocompleteInstances = new Map<
+  string,
+  google.maps.places.Autocomplete
+>();
 
 export function AddressAutocomplete({
   onAddressSelect,
   defaultValue = "",
+  value,
+  onChange,
+  instanceId = "default",
 }: AddressAutocompleteProps) {
   const [error, setError] = useState<string | null>(null);
   const { isLoaded, loadError } = useLoadGoogleMaps();
-  const [inputValue, setInputValue] = useState(defaultValue);
+  const [inputValue, setInputValue] = useState(value ?? defaultValue);
   const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
   useEffect(() => {
-    if (!isLoaded || !inputRef.current || autocompleteRef.current) return;
+    if (!isLoaded || !inputRef.current) return;
+
+    // Si ya existe una instancia para este ID, la limpiamos
+    if (autocompleteInstances.has(instanceId)) {
+      const instance = autocompleteInstances.get(instanceId);
+      if (instance) {
+        google.maps.event.clearInstanceListeners(instance);
+      }
+      autocompleteInstances.delete(instanceId);
+    }
 
     try {
       const autocomplete = new window.google.maps.places.Autocomplete(
@@ -52,19 +71,20 @@ export function AddressAutocomplete({
         setInputValue(place.formatted_address);
       });
 
-      autocompleteRef.current = autocomplete;
+      autocompleteInstances.set(instanceId, autocomplete);
     } catch (err) {
       console.error("Error initializing Google Maps Autocomplete:", err);
       setError("Error al inicializar el autocompletado de direcciones");
     }
 
     return () => {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-        autocompleteRef.current = null;
+      const instance = autocompleteInstances.get(instanceId);
+      if (instance) {
+        google.maps.event.clearInstanceListeners(instance);
+        autocompleteInstances.delete(instanceId);
       }
     };
-  }, [isLoaded, onAddressSelect]);
+  }, [isLoaded, instanceId, onAddressSelect]);
 
   if (loadError) {
     return (
@@ -97,11 +117,17 @@ export function AddressAutocomplete({
     );
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    onChange?.(newValue);
+  };
+
   return (
     <Input
       ref={inputRef}
-      value={inputValue}
-      onChange={(e) => setInputValue(e.target.value)}
+      value={value ?? inputValue}
+      onChange={handleInputChange}
       placeholder="Buscar dirección..."
       className="w-full"
     />

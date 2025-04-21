@@ -2,6 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
   Form,
   FormField,
@@ -32,22 +33,10 @@ import { getLocalISOString } from "@/lib/utils";
 import {
   createShipmentSchema,
   type CreateShipmentFormData,
-} from "./create-shipment-schema";
-
-declare global {
-  interface Window {
-    google: {
-      maps: {
-        Geocoder: new () => google.maps.Geocoder;
-        GeocoderStatus: {
-          OK: "OK";
-        };
-      };
-    };
-  }
-}
+} from "../../schemas/create-shipment-schema";
 
 export function CreateShipmentForm() {
+  const navigate = useNavigate();
   const form = useForm<CreateShipmentFormData>({
     resolver: zodResolver(createShipmentSchema),
     defaultValues: {
@@ -133,6 +122,7 @@ export function CreateShipmentForm() {
 
       toast.success("Shipment created successfully");
       form.reset();
+      navigate("/shipments");
     } catch (error) {
       console.error("Error creating shipment:", error);
       toast.error("Failed to create shipment. Please try again.");
@@ -273,6 +263,7 @@ export function CreateShipmentForm() {
                     <FormLabel>Dirección de origen</FormLabel>
                     <FormControl>
                       <AddressAutocomplete
+                        instanceId="origin"
                         onAddressSelect={(place) => {
                           if (place) {
                             form.setValue(
@@ -298,6 +289,7 @@ export function CreateShipmentForm() {
                     <FormLabel>Dirección de destino</FormLabel>
                     <FormControl>
                       <AddressAutocomplete
+                        instanceId="destination"
                         onAddressSelect={(place) => {
                           if (place) {
                             form.setValue(

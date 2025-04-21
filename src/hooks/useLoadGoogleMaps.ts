@@ -1,8 +1,66 @@
 import { useState, useEffect } from "react";
 
-declare global {
-  interface Window {
-    initMap: () => void;
+class GoogleMapsLoader {
+  private static instance: GoogleMapsLoader;
+  private loadPromise: Promise<void> | null = null;
+  private callbacks: Array<(error?: Error) => void> = [];
+
+  private constructor() {}
+
+  static getInstance(): GoogleMapsLoader {
+    if (!GoogleMapsLoader.instance) {
+      GoogleMapsLoader.instance = new GoogleMapsLoader();
+    }
+    return GoogleMapsLoader.instance;
+  }
+
+  load(apiKey: string): Promise<void> {
+    if (this.loadPromise) {
+      return this.loadPromise;
+    }
+
+    this.loadPromise = new Promise((resolve, reject) => {
+      // Si Google Maps ya está cargado, resolvemos inmediatamente
+      if (window.google?.maps) {
+        resolve();
+        return;
+      }
+
+      // Limpiamos scripts existentes
+      const existingScripts = document.querySelectorAll(
+        'script[src*="maps.googleapis.com"]'
+      );
+      existingScripts.forEach((s) => s.remove());
+
+      window.initMap = () => {
+        resolve();
+        this.callbacks.forEach((cb) => cb());
+      };
+
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+
+      script.onerror = () => {
+        const error = new Error("Failed to load Google Maps");
+        reject(error);
+        this.callbacks.forEach((cb) => cb(error));
+        script.remove();
+        this.loadPromise = null;
+      };
+
+      document.head.appendChild(script);
+    });
+
+    return this.loadPromise;
+  }
+
+  onLoad(callback: (error?: Error) => void) {
+    this.callbacks.push(callback);
+    return () => {
+      this.callbacks = this.callbacks.filter((cb) => cb !== callback);
+    };
   }
 }
 
@@ -18,33 +76,26 @@ export const useLoadGoogleMaps = () => {
       return;
     }
 
-    if (window.google?.maps?.places) {
-      setIsLoaded(true);
-      return;
-    }
+    const loader = GoogleMapsLoader.getInstance();
+    const removeCallback = loader.onLoad((error) => {
+      if (error) {
+        setLoadError(error);
+      } else {
+        setIsLoaded(true);
+      }
+    });
 
-    window.initMap = () => setIsLoaded(true);
-
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMap`;
-    script.async = true;
-    script.defer = true;
-
-    const handleScriptError = () => {
-      script.remove();
-      setLoadError(new Error("Failed to load Google Maps"));
-    };
-
-    script.addEventListener("error", handleScriptError);
-
-    document.head.appendChild(script);
+    loader
+      .load(GOOGLE_MAPS_API_KEY)
+      .then(() => {
+        setIsLoaded(true);
+      })
+      .catch((error) => {
+        setLoadError(error);
+      });
 
     return () => {
-      window.initMap = () => {};
-      if (script) {
-        script.removeEventListener("error", handleScriptError);
-        script.remove();
-      }
+      removeCallback();
     };
   }, []);
 
