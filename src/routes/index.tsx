@@ -16,6 +16,7 @@ import { DashboardPage } from "@/pages/dashboard/DashboardPage";
 import { ProfilePage } from "@/pages/dashboard/ProfilePage";
 import { ShipmentsPage } from "@/pages/shipments/ShipmentsPage";
 import { CreateShipmentPage } from "@/pages/shipments/CreateShipmentPage";
+import { TrackingPage } from "@/pages/shipments/TrackingPage";
 
 const router = createBrowserRouter([
   // Public routes
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <DashboardPage />,
+      },
+      {
+        path: "shipments/tracking/:id",
+        element: <TrackingPage />,
       },
       {
         path: "shipments",

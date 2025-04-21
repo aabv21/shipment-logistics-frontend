@@ -7,6 +7,12 @@ export interface Address {
   placeId?: string;
 }
 
+export type ShipmentStatus =
+  | "PENDING"
+  | "IN_TRANSIT"
+  | "DELIVERED"
+  | "CANCELLED";
+
 export interface Shipment {
   id: string;
   tracking_number: string;
@@ -30,7 +36,7 @@ export interface Shipment {
   start_date_time: string;
   delivery_date_time: string;
   window_delivery_time?: string;
-  status: "PENDING" | "IN_TRANSIT" | "DELIVERED" | "CANCELLED";
+  status: ShipmentStatus;
   created_at: string;
   updated_at: string;
   carrier_id?: string;

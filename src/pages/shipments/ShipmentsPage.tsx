@@ -23,16 +23,16 @@ import {
   SearchIcon,
   PlusIcon,
   TrashIcon,
-  EyeIcon,
-  PackageIcon,
   MapPinIcon,
+  MapIcon,
+  PackageIcon,
   ArrowRightIcon,
   ActivityIcon,
   CalendarIcon,
   SettingsIcon,
+  RouteIcon,
   CopyIcon,
   TruckIcon,
-  MapIcon,
 } from "lucide-react";
 import { formatDate, getShipmentStatusInfo } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -94,8 +94,8 @@ export function ShipmentsPage() {
     }
   };
 
-  const handleViewTracking = (trackingNumber: string) => {
-    navigate(`/shipments/tracking/${trackingNumber}`);
+  const handleViewTracking = (id: string) => {
+    navigate(`/shipments/tracking/${id}`);
   };
 
   const copyToClipboard = (text: string) => {
@@ -156,7 +156,7 @@ export function ShipmentsPage() {
               </TableHead>
               <TableHead>
                 <div className="flex items-center gap-2">
-                  <MapIcon className="h-4 w-4" />
+                  <RouteIcon className="h-4 w-4" />
                   Ruta
                 </div>
               </TableHead>
@@ -311,12 +311,10 @@ export function ShipmentsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() =>
-                          handleViewTracking(shipment.tracking_number)
-                        }
+                        onClick={() => handleViewTracking(shipment.id)}
                         title="Ver tracking"
                       >
-                        <EyeIcon className="h-4 w-4" />
+                        <MapIcon className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"

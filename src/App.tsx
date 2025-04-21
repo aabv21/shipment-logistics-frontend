@@ -1,13 +1,12 @@
-import { AppRouter } from "./routes";
-import { Toaster } from "@/components/ui/sonner";
+import { AppRouter } from "@/routes";
+import { Toaster } from "sonner";
+import { WebSocketProvider } from "@/providers/WebSocketProvider";
 
-function App() {
+export function App() {
   return (
-    <>
+    <WebSocketProvider>
       <AppRouter />
-      <Toaster />
-    </>
+      <Toaster richColors position="top-right" />
+    </WebSocketProvider>
   );
 }
-
-export default App;
