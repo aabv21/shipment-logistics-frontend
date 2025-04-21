@@ -1,11 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { AppRouter } from "@/routes";
+import { Toaster } from "sonner";
+import { WebSocketProvider } from "@/providers/WebSocketProvider";
 
-function App() {
+export function App() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-svh">
-      <Button>Click me</Button>
-    </div>
+    <WebSocketProvider>
+      <AppRouter />
+      <Toaster richColors position="top-right" />
+    </WebSocketProvider>
   );
 }
-
-export default App;

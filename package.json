@@ -10,19 +10,54 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@geoapify/geocoder-autocomplete": "^2.1.0",
+    "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-alert-dialog": "^1.1.10",
+    "@radix-ui/react-checkbox": "^1.2.2",
+    "@radix-ui/react-dialog": "^1.1.10",
+    "@radix-ui/react-label": "^2.1.4",
+    "@radix-ui/react-navigation-menu": "^1.2.9",
+    "@radix-ui/react-popover": "^1.1.10",
+    "@radix-ui/react-select": "^2.2.2",
+    "@radix-ui/react-separator": "^1.1.4",
     "@radix-ui/react-slot": "^1.2.0",
+    "@radix-ui/react-tabs": "^1.1.8",
+    "@radix-ui/react-tooltip": "^1.2.3",
+    "@react-google-maps/api": "^2.20.6",
     "@tailwindcss/vite": "^4.1.4",
+    "@types/lodash": "^4.17.16",
+    "@types/socket.io-client": "^3.0.0",
+    "@vis.gl/react-google-maps": "^1.5.2",
+    "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "leaflet": "^1.9.4",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.501.0",
+    "next-themes": "^0.4.6",
     "react": "^19.0.0",
+    "react-day-picker": "8.10.1",
     "react-dom": "^19.0.0",
+    "react-google-autocomplete": "^2.7.5",
+    "react-google-maps": "^9.4.5",
+    "react-hook-form": "^7.55.0",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.5.1",
+    "recharts": "^2.15.3",
+    "socket.io-client": "^4.8.1",
+    "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
-    "tw-animate-css": "^1.2.5"
+    "tailwindcss-animate": "^1.0.7",
+    "tw-animate-css": "^1.2.5",
+    "zod": "^3.24.3",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@tailwindcss/postcss": "^4.1.4",
     "@tailwindcss/typography": "^0.5.16",
+    "@types/google.maps": "^3.58.1",
     "@types/node": "^22.14.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
@@ -35,6 +70,7 @@
     "postcss": "^8.5.3",
     "postcss-nested": "^7.0.2",
     "tailwindcss": "^4.1.4",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
     "vite": "^6.3.1"
@@ -50,5 +86,12 @@
   "bugs": {
     "url": "https://github.com/aabv21/shipment-logistics-frontend/issues"
   },
-  "homepage": "https://github.com/aabv21/shipment-logistics-frontend#readme"
+  "homepage": "https://github.com/aabv21/shipment-logistics-frontend#readme",
+  "_moduleAliases": {
+    "@": "./src",
+    "@components": "./src/components",
+    "@lib": "./src/lib",
+    "@services": "./src/services",
+    "@stores": "./src/stores"
+  }
 }
